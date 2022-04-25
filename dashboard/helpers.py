@@ -26,26 +26,35 @@ def get_trade_data(request, ticker_id):
 def get_daily_depths_data(request, ticker_id):
     if request.method == 'GET':
         daily_date = request.GET.get('daily_date')
+        intraday = request.GET.get('intraday')
 
         if daily_date is None:
             daily_date = datetime.today().strftime('%Y-%m-%d')
 
-        daily_depths = Depth.objects.filter(data_id=ticker_id).filter(tick_timestamp__date=daily_date).order_by('-tick_timestamp')
+        if(intraday == 'on'):
+            daily_depths = Depth.objects.filter(data_id=ticker_id).filter(tick_timestamp__date=daily_date).order_by('-tick_timestamp')
+        else:
+            daily_depths = Depth.objects.filter(data_id=ticker_id).filter(tick_timestamp__gte=daily_date).order_by(
+                '-tick_timestamp')
 
         return daily_depths
 
 def get_daily_trades_data(request, ticker_id):
     if request.method == 'GET':
         daily_date = request.GET.get('daily_date')
+        intraday = request.GET.get('intraday')
 
         if daily_date is None:
             daily_date = datetime.today().strftime('%Y-%m-%d')
 
-        daily_trades = Trade.objects.filter(data_id=ticker_id).filter(trade_timestamp__date=daily_date).order_by('-trade_timestamp')
-
+        if(intraday == 'on'):
+            daily_trades = Trade.objects.filter(data_id=ticker_id).filter(trade_timestamp__date=daily_date).order_by('-trade_timestamp')
+        else:
+            daily_trades = Trade.objects.filter(data_id=ticker_id).filter(trade_timestamp__gte=daily_date).order_by(
+                '-trade_timestamp')
         return daily_trades
 
-def get_graphs(stock_data, trades_list, daily_trades_list, daily_depth_list):
+def get_graphs(stock_data, trades_list):
     graphs = []
     if(len(trades_list) > 0):
         df = pd.DataFrame(trades_list)
@@ -96,18 +105,15 @@ def get_daily_volume_plot(stock_data, daily_depth_list, daily_trades_list):
         graphs.append(
             go.Line(x=df_trades['trade_timestamp'], y=df_trades['price'], name='Price')
         )
-
         graphs.append(
             go.Line(x=df_depths['tick_timestamp'], y=ask_volume-bid_volume, name='Buy - Sell volume', yaxis='y2')
         )
-        # graphs.append(
-        #     go.Line(x=df_depths['tick_timestamp'], y=smoothTriangle(bid_volume - ask_volume, 10), name='Buy - Sell Orders', yaxis='y2')
-        # )
+
         layout = {
             'title': 'Order book plot for ' + str(stock_data.ticker),
             'height': 600,
             'width': 1200,
-            'xaxis': {'title': 'Time'},
+            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[17, 9], pattern="hour")]},
             'yaxis': {'title': 'Price'},
             'yaxis2': {
                 'title': 'Net Volume',
@@ -142,7 +148,7 @@ def get_daily_orders_plot(stock_data, daily_depth_list, daily_trades_list):
             'title': 'Net book plot for ' + str(stock_data.ticker),
             'height': 600,
             'width': 1200,
-            'xaxis': {'title': 'Time'},
+            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[17, 9], pattern="hour")]},
             'yaxis': {'title': 'Price'},
             'yaxis2': {
                 'title': '#Orders',
@@ -162,25 +168,27 @@ def get_daily_price_plot(stock_data, daily_depth_list, daily_trade_list):
         df_trade = pd.DataFrame(daily_trade_list)
         df_depth = pd.DataFrame(daily_depth_list)
 
+        df_trade['clock'] = df_trade['trade_timestamp'].dt.strftime("%Y:%m:%d-%H:%M:%S")
+
         graphs = []
 
         graphs.append(
-            go.Line(x=df_trade['trade_timestamp'], y=df_trade['price'], name='Price')
+            go.Line(x=df_trade['trade_timestamp'], y=df_trade['price'], customdata=df_trade['volume'], hovertemplate='(price:%{y},volume:%{customdata})', name='Price')
         )
         graphs.append(
             go.Line(x=df_depth['tick_timestamp'], y=df_depth['ask1'], name='Ask')
         )
         graphs.append(
-            go.Line(x=df_depth['tick_timestamp'], y=df_depth['bid1'], name='Bid')
+            go.Line(x=df_depth['tick_timestamp'], y=df_depth['bid1'],name='Bid')
         )
         graphs.append(
-            go.Bar(x=df_trade['volume'], y=df_trade['price'], opacity=0.5, name='Distribution plot', xaxis='x2', orientation='h')
+            go.Bar(x=df_trade['volume'], y=df_trade['price'], customdata=df_trade['clock'], hovertemplate='(volume:%{x}, price:%{y})<br>time: (%{customdata})', opacity=0.5, name='Distribution plot', xaxis='x2', orientation='h')
         )
 
         layout = {
             'title': 'Daily price plot for ' + str(stock_data.ticker),
             'yaxis': {'title': 'Price'},
-            'xaxis': {'title': 'Time'},
+            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[17, 9], pattern="hour")]},
             'xaxis2': {
                 'title': 'Volume',
                 'titlefont': {'color': 'rgb(148, 103, 189)'},
@@ -214,7 +222,7 @@ def get_daily_spread_plot(stock_data, daily_depth_list, daily_trade_list):
         layout = {
             'title': 'Daily spread plot for ' + str(stock_data.ticker),
             'yaxis': {'title': 'Price'},
-            'xaxis': {'title': 'Time'},
+            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[17, 9], pattern="hour")]},
             'yaxis2': {
                 'title': 'Spread (Ask - Bid)',
                 'titlefont': {'color': 'rgb(148, 103, 189)'},
