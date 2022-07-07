@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+    <style>
+    table, th, td {
+      border:1px solid black;
+    }
+    </style>
     <head>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <meta charset="UTF-8">
@@ -46,6 +51,22 @@
                   <button type="submit" class="btn btn-primary">Search</button>
           <form>
 
+          <hr />
+
+          <table style="width:100%">
+              <tr>
+                <th>Metric</th>
+                <th>Value</th>
+              </tr>
+              <tr>
+                <td>#Trades</td>
+                <td>{{ number_of_trades }}</td>
+              </tr>
+              <tr>
+                <td>#Depths</td>
+                <td>{{ number_of_depths }}</td>
+              </tr>
+            </table>
           <hr />
 
           {% autoescape off %}

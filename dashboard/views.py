@@ -3,9 +3,6 @@ from django.shortcuts import render
 from .helpers import get_trade_data, get_daily_trades_data, get_daily_depths_data, get_distribution_plot, \
     get_daily_volume_plot, get_daily_price_plot, get_daily_orders_plot, get_daily_spread_plot
 from .models import Stock
-import pandas as pd
-from plotly.offline import plot
-import plotly.graph_objects as go
 
 
 # Create your views here.
@@ -22,13 +19,7 @@ def stock(request, ticker_id, **kwargs):
     trades = get_trade_data(request, ticker_id)
     daily_depths = get_daily_depths_data(request, ticker_id)
     daily_trades = get_daily_trades_data(request, ticker_id)
-    trades_list = [
-        {
-            'price': trade.price,
-            'volume': trade.volume,
-            'trade_timestamp': trade.trade_timestamp
-        } for trade in trades
-    ]
+
     daily_trades_list = [
         {
             'price': trade.price,
@@ -67,20 +58,24 @@ def stock(request, ticker_id, **kwargs):
         } for depth in daily_depths
     ]
 
-    distribution_plot = get_distribution_plot(stock_data, trades_list)
     daily_volume_plot = get_daily_volume_plot(stock_data, daily_depth_list, daily_trades_list)
     daily_orders_plot = get_daily_orders_plot(stock_data, daily_depth_list, daily_trades_list)
     daily_price_plot = get_daily_price_plot(stock_data, daily_depth_list, daily_trades_list)
     daily_spread_plot = get_daily_spread_plot(stock_data, daily_depth_list, daily_trades_list)
 
+    number_of_trades = len(daily_trades_list)
+    number_of_depths = len(daily_depth_list)
+
     context = {
-        'distribution_plot': distribution_plot,
+        # 'distribution_plot': distribution_plot,
         'daily_volume_plot': daily_volume_plot,
         'daily_orders_plot': daily_orders_plot,
         'daily_price_plot': daily_price_plot,
         'daily_spread_plot': daily_spread_plot,
         'stock': stock_data,
         'trades': trades,
-        'daily_trades': daily_trades
+        'daily_trades': daily_trades,
+        'number_of_trades': number_of_trades,
+        'number_of_depths': number_of_depths
     }
     return render(request, 'stock.html', context)

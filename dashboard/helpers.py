@@ -113,7 +113,7 @@ def get_daily_volume_plot(stock_data, daily_depth_list, daily_trades_list):
             'title': 'Order book plot for ' + str(stock_data.ticker),
             'height': 600,
             'width': 1200,
-            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[17, 9], pattern="hour")]},
+            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[16.5, 8.75], pattern="hour")]},
             'yaxis': {'title': 'Price'},
             'yaxis2': {
                 'title': 'Net Volume',
@@ -148,7 +148,7 @@ def get_daily_orders_plot(stock_data, daily_depth_list, daily_trades_list):
             'title': 'Net book plot for ' + str(stock_data.ticker),
             'height': 600,
             'width': 1200,
-            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[17, 9], pattern="hour")]},
+            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[16.5, 8.75], pattern="hour")]},
             'yaxis': {'title': 'Price'},
             'yaxis2': {
                 'title': '#Orders',
@@ -188,7 +188,7 @@ def get_daily_price_plot(stock_data, daily_depth_list, daily_trade_list):
         layout = {
             'title': 'Daily price plot for ' + str(stock_data.ticker),
             'yaxis': {'title': 'Price'},
-            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[17, 9], pattern="hour")]},
+            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[16.5, 8.75], pattern="hour")]},
             'xaxis2': {
                 'title': 'Volume',
                 'titlefont': {'color': 'rgb(148, 103, 189)'},
@@ -222,7 +222,7 @@ def get_daily_spread_plot(stock_data, daily_depth_list, daily_trade_list):
         layout = {
             'title': 'Daily spread plot for ' + str(stock_data.ticker),
             'yaxis': {'title': 'Price'},
-            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[17, 9], pattern="hour")]},
+            'xaxis': {'title': 'Time', 'rangebreaks': [dict(bounds=["sat", "mon"]), dict(bounds=[16.5, 8.75], pattern="hour")]},
             'yaxis2': {
                 'title': 'Spread (Ask - Bid)',
                 'titlefont': {'color': 'rgb(148, 103, 189)'},
